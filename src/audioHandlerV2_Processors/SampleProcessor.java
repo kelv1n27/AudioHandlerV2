@@ -25,7 +25,8 @@ public class SampleProcessor extends AudioProcessor{
 	private int reader = 0;
 	private Object syncObject = new Object();
 	private String source;
-	JCheckBox loopBox;
+	private JCheckBox loopBox;
+	private boolean paused = false;
 	
 	public SampleProcessor(String source) {
 		setTitle("Sampler: no source");
@@ -69,7 +70,7 @@ public class SampleProcessor extends AudioProcessor{
 		byte[] inBytes = new byte[samples.length * (sampleFormat.getSampleSizeInBits()/8)];
 		float[] output = new float[samples.length];
 		synchronized(syncObject) {
-			if (reader != -1) {
+			if (reader != -1 && !paused) {
 				try {
 					reader = inStream.read(inBytes, 0, inBytes.length);
 					float[] temp = decodeBytes(inBytes, format);
@@ -139,6 +140,10 @@ public class SampleProcessor extends AudioProcessor{
 		return samples;
 	}
 
+	public void togglePause(boolean paused) {
+		this.paused = paused;
+	}
+	
 	@Override
 	public String toString() {
 		return "Sampler: " + source;
