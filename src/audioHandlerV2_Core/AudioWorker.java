@@ -101,11 +101,31 @@ public class AudioWorker extends VisibleComponent{
 		}
 	}
 	
+	public AudioWorker addWorker(String name, int index) {
+		synchronized(syncObject) {
+			AudioWorker worker = new AudioWorker(floatBufferSize, format, name);
+			workers.add(index, worker);
+			//
+			inModel.add(index, worker);
+			//
+			return worker;
+		}
+	}
+	
 	public void addProcessor(AudioProcessor p) {
 		synchronized(syncObject) {
 			processors.add(p);
 			//
 			procModel.addElement(p);
+			//
+		}
+	}
+	
+	public void addProcessor(AudioProcessor p, int index) {
+		synchronized(syncObject) {
+			processors.add(index, p);
+			//
+			procModel.add(index, p);
 			//
 		}
 	}

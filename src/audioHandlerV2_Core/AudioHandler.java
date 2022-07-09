@@ -22,8 +22,6 @@ public class AudioHandler extends Thread{
 	public AudioHandler(int floatBufferSize){
 		try {
 			AudioInputStream a = AudioSystem.getAudioInputStream(new BufferedInputStream(getClass().getResourceAsStream("/16bitWAVexample.wav")));
-//			AudioInputStream a = AudioSystem.getAudioInputStream(new BufferedInputStream(getClass().getResourceAsStream("/Stat up 1.wav")));
-
 			format = a.getFormat();
 			System.out.println(format);
 			DataLine.Info i = new DataLine.Info(SourceDataLine.class, format);
