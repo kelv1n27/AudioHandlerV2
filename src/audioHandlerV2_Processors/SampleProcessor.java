@@ -88,9 +88,6 @@ public class SampleProcessor extends AudioProcessor{
 					}										//if looping
 				}	
 			}
-//			for (int i = 0; i < output.length; i++) {
-//				output[i] = ((i/16)%2==0?1:0);
-//			}
 			return output;
 		}	
 	}
@@ -138,7 +135,6 @@ public class SampleProcessor extends AudioProcessor{
 				temp -= Math.pow(2.0, format.getSampleSizeInBits() - 1);
 			}
 			samples[i/bytesPerSample] = (float) (temp/Math.pow(2.0, format.getSampleSizeInBits() - 1));
-			if ((i/bytesPerSample)%2 ==1) System.out.println(samples[i/bytesPerSample]);
 		}
 		return samples;
 	}
