@@ -89,6 +89,8 @@ public class SampleProcessor extends AudioProcessor{
 					}										//if looping
 				}	
 			}
+			if (paused)//pass through for when paused
+				return samples;
 			return output;
 		}	
 	}
