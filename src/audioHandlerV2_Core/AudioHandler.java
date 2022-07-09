@@ -22,6 +22,8 @@ public class AudioHandler extends Thread{
 	public AudioHandler(int floatBufferSize){
 		try {
 			AudioInputStream a = AudioSystem.getAudioInputStream(new BufferedInputStream(getClass().getResourceAsStream("/16bitWAVexample.wav")));
+//			AudioInputStream a = AudioSystem.getAudioInputStream(new BufferedInputStream(getClass().getResourceAsStream("/Stat up 1.wav")));
+
 			format = a.getFormat();
 			System.out.println(format);
 			DataLine.Info i = new DataLine.Info(SourceDataLine.class, format);
@@ -91,25 +93,28 @@ public class AudioHandler extends Thread{
 	}
 	
 	public void release() {
+		running = false;
 		masterOut.drain();
 		masterOut.close();
+		master.dispose();
 	}
 	
 	private byte[] encodeBytes(float[] samples, AudioFormat format) {
 		int bytesPerSample = format.getSampleSizeInBits()/8;
 		byte[] bytes = new byte[samples.length*bytesPerSample];
-		for (int i = 0; i < samples.length; i+=bytesPerSample) {
+		for (int i = 0; i < samples.length; i++) {
 			long temp = 0;
 			if (format.getEncoding()==Encoding.PCM_SIGNED) {
-				temp = (long) (samples[i] * Math.pow(2, format.getSampleSizeInBits()-1));
+				temp = (long) (samples[i] * Math.pow(2.0, format.getSampleSizeInBits() - 1));
 			} else if (format.getEncoding() == Encoding.PCM_UNSIGNED) {
-				temp = (long) (samples[i] * Math.pow(2, format.getSampleSizeInBits()-1));
-				temp -= Math.pow(2, format.getSampleSizeInBits()-1);
+				temp = (long) (samples[i] * Math.pow(2.0, format.getSampleSizeInBits() - 1));
+				temp += Math.pow(2.0, format.getSampleSizeInBits() - 1);
 			}
-			bytes[i*2] = (byte) (temp & 0xffL);
+			bytes[i*bytesPerSample] = (byte) (temp & 0xff);
 			if(bytesPerSample == 2)
-				bytes[i*2 + 1] = (byte) ((temp >> 8) & 0xff);
+				bytes[i*bytesPerSample + 1] = (byte) ((temp >> 8) & 0xff);
 		}
+		
 		return bytes;
 	}
 }

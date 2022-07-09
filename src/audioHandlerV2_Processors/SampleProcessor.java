@@ -14,6 +14,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 public class SampleProcessor extends AudioProcessor{
@@ -87,6 +88,9 @@ public class SampleProcessor extends AudioProcessor{
 					}										//if looping
 				}	
 			}
+//			for (int i = 0; i < output.length; i++) {
+//				output[i] = ((i/16)%2==0?1:0);
+//			}
 			return output;
 		}	
 	}
@@ -131,9 +135,10 @@ public class SampleProcessor extends AudioProcessor{
 			if (format.getEncoding()==Encoding.PCM_SIGNED) {
 				temp = (temp << (64 - format.getSampleSizeInBits()) >> (64 - format.getSampleSizeInBits()));
 			} else if (format.getEncoding() == Encoding.PCM_UNSIGNED) {
-				temp -= Math.pow(2, format.getSampleSizeInBits()-1);
+				temp -= Math.pow(2.0, format.getSampleSizeInBits() - 1);
 			}
-			samples[i/bytesPerSample] = (float) (temp/Math.pow(2, format.getSampleSizeInBits()-1));
+			samples[i/bytesPerSample] = (float) (temp/Math.pow(2.0, format.getSampleSizeInBits() - 1));
+			if ((i/bytesPerSample)%2 ==1) System.out.println(samples[i/bytesPerSample]);
 		}
 		return samples;
 	}
