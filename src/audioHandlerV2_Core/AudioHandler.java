@@ -53,14 +53,38 @@ public class AudioHandler extends Thread{
 		}
 	}
 	
+	public AudioHandler(float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian, int floatBufferSize) {
+		try {
+			format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
+			format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, sampleRate, sampleSizeInBits, channels, (sampleSizeInBits >> 3) * channels, sampleRate, bigEndian);
+			System.out.println(format);
+			DataLine.Info i = new DataLine.Info(SourceDataLine.class, format);
+			masterOut = (SourceDataLine) AudioSystem.getLine(i);
+			masterControls = masterOut.getControls();
+			masterOut.open(format, floatBufferSize*5);
+			masterOut.start();
+			this.floatBufferSize = floatBufferSize;
+			master = new AudioWorker(floatBufferSize, format, "Master");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void run() {
 		while (running) {
+			long startTime = System.nanoTime();
 			float[] in;
 			synchronized(syncObject) {
 				in = master.process();
 			}
 			byte[] out = encodeBytes(in, format);
 			masterOut.write(out, 0, out.length);
+//			System.out.println(masterOut.getBufferSize());
+//			try {
+//				Thread.sleep(Math.max(0, ((22676 * floatBufferSize/2) - (System.nanoTime() - startTime))/1000000));//delay processing until all samples played (22676ns/f only works for 44100f/s)
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
 		}
 	}
 	

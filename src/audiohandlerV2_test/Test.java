@@ -10,11 +10,12 @@ import audioHandlerV2_Processors.VolumeProcessor;
 public class Test {
 
 	public static void main(String[] args) {
-		AudioHandler a = new AudioHandler("/Stat up 1.wav", 2);
-		//AudioHandler a = new AudioHandler(32);
+		//AudioHandler a = new AudioHandler("/Stat up 1.wav", 2);
+		//AudioHandler a = new AudioHandler(736);
+		AudioHandler a = new AudioHandler(44100, 16, 2, true, false, 736);
 		AudioWorker master = a.getMaster();
 		AudioWorker blip = master.addWorker("beep");
-		SampleProcessor sampler = new SampleProcessor("/Stat up 1.wav");
+		SampleProcessor sampler = new SampleProcessor("/clipped16bitWAVexample.wav");
 		VolumeProcessor vol = new VolumeProcessor();
 		vol.changeVol(1f);
 		sampler.setLooping(false);
@@ -23,12 +24,12 @@ public class Test {
 		blip.addProcessor(vol);
 		//blip.addProcessor(reverb);
 		//reverb.setVisible(true);
-		
-		master.setVisible(true);
+		sampler.setVisible(true);
+		//master.setVisible(true);
 		
 		a.start();
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
