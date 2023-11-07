@@ -109,14 +109,22 @@ public class ReverbProcessor extends AudioProcessor{
 			float[] decaySamples = new float[samples.length];
 			for(int i = 0; i < decaySamples.length; i++)
 				decaySamples[i] = comb1[i] + comb2[i] + comb3[i] + comb4[i];
-			//mix feedback and source
+			
+//			//mix feedback and source
+//			float[] mixSamples = new float[samples.length];
+//			for (int i = 0; i < samples.length; i++)
+//				mixSamples[i] = ((1f - mix) * samples[i]) + (mix * decaySamples[i]);
+//			//allpass filters
+//			mixSamples = allpass1.process(mixSamples, sampleFormat);
+//			//mixSamples = allpass1.process(mixSamples, sampleFormat);
+//			mixSamples = allpass2.process(mixSamples, sampleFormat);
+			
+			decaySamples = allpass1.process(decaySamples, sampleFormat);
+			decaySamples = allpass2.process(decaySamples, sampleFormat);
 			float[] mixSamples = new float[samples.length];
 			for (int i = 0; i < samples.length; i++)
 				mixSamples[i] = ((1f - mix) * samples[i]) + (mix * decaySamples[i]);
-			//allpass filters
-			mixSamples = allpass1.process(mixSamples, sampleFormat);
-			//mixSamples = allpass1.process(mixSamples, sampleFormat);
-			mixSamples = allpass2.process(mixSamples, sampleFormat);
+			
 			return mixSamples;
 		}
 	}

@@ -16,6 +16,12 @@ public class CombFilterProcessor extends AudioProcessor{
 		this.decay = decay;
 	}
 	
+	/*
+	 *  ->-----> delay --->-+->   
+	 *       ^				|
+	 *       `-- gain <-----'
+	 */
+	
 	//out[n] = in[n] + (decay * out[n - delaySamples])
 	public float[] process(float[] samples, AudioFormat sampleFormat){
 		synchronized(syncObject){
@@ -28,8 +34,10 @@ public class CombFilterProcessor extends AudioProcessor{
 					mem.add(0f);
 			}
 			//put processed samples into memory, offset so t=0 is t=delaySamples; t=0 is delaySamples samples in the past
+			try {
 			for (int i = 0; i < samples.length; i++)
 				mem.set(delaySamples + i, samples[i] + (mem.get(i) * decay));
+			} catch (Exception e) {System.out.println(delay + " " + delaySamples); }
 			//put needed samples into array and return
 			float[] output = new float[samples.length];
 			for (int i = 0; i < output.length; i++)
@@ -45,7 +53,7 @@ public class CombFilterProcessor extends AudioProcessor{
 	
 	public void setDelay(float delay) {
 		synchronized(syncObject) {
-			this.delay = delay;
+			this.delay = Math.max(delay, 0);
 		}
 	}
 	
