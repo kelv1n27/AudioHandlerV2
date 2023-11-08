@@ -13,7 +13,7 @@ public class Test {
 	public static void main(String[] args) {
 		//AudioHandler a = new AudioHandler("/Stat up 1.wav", 2);
 		//AudioHandler a = new AudioHandler(736);
-		AudioHandler a = new AudioHandler(44100, 16, 2, true, false, 736);//736
+		AudioHandler a = new AudioHandler(44100, 16, 1, true, false, 736);//736
 		AudioWorker master = a.getMaster();
 		master.setVisible(true);
 		
