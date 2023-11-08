@@ -6,8 +6,6 @@ import javax.sound.sampled.AudioFormat;
 
 public class AllpassFilterProcessor extends AudioProcessor{
 
-	private ArrayList<Float> inMem = new ArrayList<Float>();
-	private ArrayList<Float> outMem = new ArrayList<Float>();
 	private ArrayList<Float> mem = new ArrayList<Float>();
 	private float decay;
 	private Object syncObject = new Object();
@@ -47,10 +45,6 @@ public class AllpassFilterProcessor extends AudioProcessor{
 	}
 	
 	public void dispose() {
-		inMem.clear();
-		inMem = null;
-		outMem.clear();
-		outMem = null;
 		mem.clear();
 		mem = null;
 	}

@@ -4,6 +4,8 @@ import audioHandlerV2_Core.AudioHandler;
 import audioHandlerV2_Core.AudioWorker;
 import audioHandlerV2_Processors.ReverbProcessor;
 import audioHandlerV2_Processors.SampleProcessor;
+import audioHandlerV2_Processors.SynthProcessor;
+import audioHandlerV2_Processors.VolMonitorProcessor;
 
 //This is not an automated unit test or regression test, just put what you want in here and see what happens
 public class Test {
@@ -15,21 +17,24 @@ public class Test {
 		AudioWorker master = a.getMaster();
 		master.setVisible(true);
 		
-		AudioWorker worker = master.addWorker("worker");
-//		SynthProcessor otherSynth = new SynthProcessor();
-//		otherSynth.changeFreq(180);
-//		worker.addProcessor(otherSynth);
+//		AudioWorker worker = master.addWorker("worker");
+		SynthProcessor otherSynth = new SynthProcessor();
+		otherSynth.changeFreq(180);
+		master.addProcessor(otherSynth);
 		
 //		SynthProcessor synth = new SynthProcessor();
 //		synth.changeFreq(100);
 //		master.addProcessor(synth);
 //		synth.setVisible(true);
 		
-		SampleProcessor sample = new SampleProcessor("/Stat up 1.wav");
-		master.addProcessor(sample);
+//		SampleProcessor sample = new SampleProcessor("/Stat up 1 panned right.wav");
+//		master.addProcessor(sample);
 		
 		ReverbProcessor reverb = new ReverbProcessor(50, .9f, 1f);
 		master.addProcessor(reverb);
+		
+		VolMonitorProcessor mon = new VolMonitorProcessor();
+		master.addProcessor(mon);
 		
 		a.start();
 		try {
