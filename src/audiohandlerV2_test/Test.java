@@ -18,19 +18,19 @@ public class Test {
 		master.setVisible(true);
 		
 //		AudioWorker worker = master.addWorker("worker");
-		SynthProcessor otherSynth = new SynthProcessor();
-		otherSynth.changeFreq(180);
-		master.addProcessor(otherSynth);
+//		SynthProcessor otherSynth = new SynthProcessor();
+//		otherSynth.changeFreq(180);
+//		master.addProcessor(otherSynth);
 		
 //		SynthProcessor synth = new SynthProcessor();
 //		synth.changeFreq(100);
 //		master.addProcessor(synth);
 //		synth.setVisible(true);
 		
-//		SampleProcessor sample = new SampleProcessor("/Stat up 1 panned right.wav");
-//		master.addProcessor(sample);
+		SampleProcessor sample = new SampleProcessor("/Boss.wav");
+		master.addProcessor(sample);
 		
-		ReverbProcessor reverb = new ReverbProcessor(50, .9f, 1f);
+		ReverbProcessor reverb = new ReverbProcessor(50, .5f, .5f);
 		master.addProcessor(reverb);
 		
 		VolMonitorProcessor mon = new VolMonitorProcessor();

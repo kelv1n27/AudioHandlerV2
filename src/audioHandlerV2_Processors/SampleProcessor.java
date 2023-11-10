@@ -16,6 +16,9 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class SampleProcessor extends AudioProcessor{
 	
@@ -26,6 +29,7 @@ public class SampleProcessor extends AudioProcessor{
 	private Object syncObject = new Object();
 	private String source;
 	private JCheckBox loopBox;
+	private JSlider progressSlider;
 	private boolean paused = false;
 	
 	public SampleProcessor(String source) {
@@ -48,6 +52,14 @@ public class SampleProcessor extends AudioProcessor{
 			}
 		});
 		panel.add(resetButton);
+		JButton pauseResumeButton = new JButton("Pause/Resume");
+		pauseResumeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				togglePause(!paused);
+			}
+		});
+		panel.add(pauseResumeButton);
 		setSize(450, 150);
 		try {
 			inStream = AudioSystem.getAudioInputStream(new BufferedInputStream(getClass().getResourceAsStream(source)));
@@ -57,6 +69,20 @@ public class SampleProcessor extends AudioProcessor{
 			this.source = source;
 			sourceLabel.setText(source);
 			setTitle("Sampler: "+ source);
+//			System.out.println(inStream.available());
+			progressSlider = new JSlider(JSlider.HORIZONTAL, 0, inStream.available(), 0);
+			progressSlider.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					try {
+						inStream.reset();
+						inStream.skip(progressSlider.getValue());
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}
+			});
+			panel.add(progressSlider);
 		} catch (UnsupportedAudioFileException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -77,13 +103,16 @@ public class SampleProcessor extends AudioProcessor{
 					for(int i = 0; i < samples.length; i++) {
 						output[i] = Math.max(-1.0f, Math.min(1.0f, samples[i]+temp[i]));
 					}
+					progressSlider.setValue(progressSlider.getValue() + reader);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				if (reader == -1 && looping) {				//if looping
-					reader = 0;								//if looping
+					reader = 0;	
+					progressSlider.setValue(0);							//if looping
 					try {									//if looping
-						inStream.reset();					//if looping
+						inStream.reset();
+						//if looping
 					} catch (IOException e) {				//if looping
 						e.printStackTrace();				//if looping
 					}										//if looping
@@ -121,6 +150,7 @@ public class SampleProcessor extends AudioProcessor{
 			try {
 				reader = 0;
 				inStream.reset();
+				progressSlider.setValue(0);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

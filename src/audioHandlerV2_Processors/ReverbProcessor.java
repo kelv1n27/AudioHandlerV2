@@ -42,7 +42,7 @@ public class ReverbProcessor extends AudioProcessor{
 		
 		JPanel delayPanel = new JPanel();
 		JLabel delayLabel = new JLabel("delay (ms)");
-		delaySlider = new JSlider(JSlider.VERTICAL, 0, 1000, 100);
+		delaySlider = new JSlider(JSlider.VERTICAL, 0, 500, 50);
 		delaySlider.setValue((int) delay);
 		delaySlider.setMajorTickSpacing(100);
 		delaySlider.setPaintTicks(true);
