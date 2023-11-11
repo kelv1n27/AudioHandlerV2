@@ -14,9 +14,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -31,6 +31,7 @@ public class SampleProcessor extends AudioProcessor{
 	private JCheckBox loopBox;
 	private JSlider progressSlider;
 	private boolean paused = false;
+	private float speed = 1.0f;
 	
 	public SampleProcessor(String source) {
 		setTitle("Sampler: no source");
@@ -88,12 +89,26 @@ public class SampleProcessor extends AudioProcessor{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		JTextField speedBox = new JTextField("1.0", 5);
+		speedBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					float newSpeed = Float.parseFloat(speedBox.getText());
+					if (newSpeed > 0) setSpeed(newSpeed);
+					speedBox.setText(speed + "");
+				} catch (Exception ex) {
+					speedBox.setText(speed + "");
+				}
+			}
+		});
+		panel.add(speedBox);
 	}
 
 	//out[n] = 1 >= sample[n] >= -1 --if looping out[n] = 1 >= sample[n%sample.length] >= -1
 	@Override
 	public float[] process(float[] samples, AudioFormat sampleFormat) {
-		byte[] inBytes = new byte[samples.length * (sampleFormat.getSampleSizeInBits()/8)];
+		byte[] inBytes = new byte[(int)(samples.length * speed) * (sampleFormat.getSampleSizeInBits()/8) ];
 		float[] output = new float[samples.length];
 		synchronized(syncObject) {
 			if (reader != -1 && !paused) {
@@ -101,7 +116,7 @@ public class SampleProcessor extends AudioProcessor{
 					reader = inStream.read(inBytes, 0, inBytes.length);
 					float[] temp = decodeBytes(inBytes, format);
 					for(int i = 0; i < samples.length; i++) {
-						output[i] = Math.max(-1.0f, Math.min(1.0f, samples[i]+temp[i]));
+						output[i] = Math.max(-1.0f, Math.min(1.0f, samples[i]+temp[Math.min(temp.length - 1, (int)(i * speed))]));
 					}
 					progressSlider.setValue(progressSlider.getValue() + reader);
 				} catch (Exception e) {
@@ -109,7 +124,7 @@ public class SampleProcessor extends AudioProcessor{
 				}
 				if (reader == -1 && looping) {				//if looping
 					reader = 0;	
-					progressSlider.setValue(0);							//if looping
+					progressSlider.setValue(0);				//if looping
 					try {									//if looping
 						inStream.reset();
 						//if looping
@@ -143,6 +158,14 @@ public class SampleProcessor extends AudioProcessor{
 		synchronized(syncObject) {
 			return looping;
 		}
+	}
+	
+	public float getSpeed() {
+		return speed;
+	}
+	
+	public void setSpeed(float speed) {
+		this.speed = speed;
 	}
 	
 	public void resetSample() {
