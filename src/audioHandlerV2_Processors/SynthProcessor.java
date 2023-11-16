@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.sound.sampled.AudioFormat;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -14,12 +17,21 @@ public class SynthProcessor extends AudioProcessor{
 	private Object syncObject = new Object();
 	private float frequency = 92.5f;
 	private float panning = .5f;//0 is left, .5f is center, 1 is right
-	private float volume = .75f;
+	private float volume = .5f;
 	private int sampleCount = 0;
 	
-	JSlider volSlider;
-	JSlider panSlider;
-	JTextField freqBox;
+	private JSlider volSlider;
+	private JSlider panSlider;
+	private JTextField freqBox;
+	private JCheckBox sineBox;
+	private JCheckBox squareBox;
+	
+	private waveForm form = waveForm.SINE;
+	
+	public enum waveForm {
+		SINE,
+		SQUARE
+	}
 	
 	public SynthProcessor() {
 		setTitle(toString());
@@ -55,24 +67,72 @@ public class SynthProcessor extends AudioProcessor{
 				} catch (Exception ex) {
 					freqBox.setText(frequency + "");
 				}
-				
 			}
 		});
 		panel.add(freqBox);
+		JPanel formPanel = new JPanel();
+		ButtonGroup group = new ButtonGroup();
+		sineBox = new JCheckBox("Sine");
+		sineBox.setSelected(true);
+		sineBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				changeForm(waveForm.SINE);
+			}
+		});
+		group.add(sineBox);
+		formPanel.add(sineBox);
+		squareBox = new JCheckBox("Square");
+		squareBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				changeForm(waveForm.SQUARE);
+			}
+		});
+		group.add(squareBox);
+		formPanel.add(squareBox);
+		panel.add(formPanel);
 		setSize(500, 250);
 	}
 
 	@Override
 	public float[] process(float[] samples, AudioFormat sampleFormat) {//currently only sine waves, add more later maybe
 		float output[] = new float[samples.length];
-		float coeff = 2 * (float)Math.PI * (frequency/sampleFormat.getSampleRate());
 		synchronized(syncObject) {
-			for ( int i = 0; i < samples.length; i += sampleFormat.getChannels()) {
-				output[i] = (1 - panning) * volume * (float) Math.sin(coeff*sampleCount) + samples[i];
-				if (sampleFormat.getChannels() == 2)
-					output[i+1] = panning * volume * (float) Math.sin(coeff*sampleCount) + samples[i+1];
-				sampleCount++;//possibility of wierdness on overflow but whatever
+			switch(form) {
+			case SINE:
+				float coeff = 2 * (float)Math.PI * (frequency/sampleFormat.getSampleRate());
+				if (sampleFormat.getChannels() == 1) {
+					for (int i = 0; i < samples.length; i++) {
+						output[i] = volume * (float) Math.sin(coeff*sampleCount) + samples[i];
+						sampleCount++;
+					}
+				} if (sampleFormat.getChannels() == 2) {
+					for ( int i = 0; i < samples.length; i += 2) {
+						output[i] = (1 - panning) * volume * (float) Math.sin(coeff*sampleCount) + samples[i];
+						output[i+1] = panning * volume * (float) Math.sin(coeff*sampleCount) + samples[i+1];
+						sampleCount++;//possibility of wierdness on overflow but whatever
+					}
+				}
+				break;
+			case SQUARE:
+				int samplesPerPeriod = (int) (sampleFormat.getSampleRate()/frequency);
+				if (sampleFormat.getChannels() == 1) {
+					for (int i = 0; i < samples.length; i++) {
+						output[i] = (sampleCount % samplesPerPeriod > samplesPerPeriod>>1 ? volume : -1 * volume ) + samples[i];
+						sampleCount++;
+					}
+				} if (sampleFormat.getChannels() == 2) {
+					for ( int i = 0; i < samples.length; i += 2) {
+						output[i] = (sampleCount % samplesPerPeriod > samplesPerPeriod>>1 ? volume : -1 * volume ) + samples[i];
+						output[i + 1] = (sampleCount % samplesPerPeriod > samplesPerPeriod>>1 ? volume : -1 * volume ) + samples[i + 1];
+						sampleCount++;
+					}
+				}
+				break;
 			}
+			
+			
 		}
 		
 		return output;
@@ -99,6 +159,18 @@ public class SynthProcessor extends AudioProcessor{
 		synchronized (syncObject) {
 			frequency = newFreq;
 			freqBox.setText(newFreq + "");
+		}
+	}
+	
+	public void changeForm(waveForm form) {
+		this.form = form;
+		switch (form) {
+		case SINE:
+			sineBox.setSelected(true);
+			break;
+		case SQUARE:
+			squareBox.setSelected(true);
+			break;
 		}
 	}
 
